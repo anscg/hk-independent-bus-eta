@@ -4,7 +4,6 @@ import { DbProvider } from "./context/DbContext";
 import { AppContextProvider } from "./context/AppContext";
 import "./i18n";
 import { DatabaseType, fetchDbFunc } from "./db";
-import ErrorFallback from "./ErrorFallback";
 import { CollectionContextProvider } from "./CollectionContext";
 import { ReactNativeContextProvider } from "./context/ReactNativeContext";
 import { EmotionContextProvider } from "./context/EmotionContext";
