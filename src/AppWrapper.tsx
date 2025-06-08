@@ -5,7 +5,6 @@ import { AppContextProvider } from "./context/AppContext";
 import "./i18n";
 import { DatabaseType, fetchDbFunc } from "./db";
 import ErrorFallback from "./ErrorFallback";
-import { ErrorBoundary } from "react-error-boundary";
 import { CollectionContextProvider } from "./CollectionContext";
 import { ReactNativeContextProvider } from "./context/ReactNativeContext";
 import { EmotionContextProvider } from "./context/EmotionContext";
@@ -26,23 +25,21 @@ const AppWrapper = () => {
   if (state === null) return <></>;
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <DbProvider initialDb={state}>
-        <CollectionContextProvider>
-          <AppContextProvider>
-            <EmotionContextProvider>
-              <PinnedEtasContextProvider>
-                <ReactNativeContextProvider>
-                  <Suspense fallback={null}>
-                    <App />
-                  </Suspense>
-                </ReactNativeContextProvider>
-              </PinnedEtasContextProvider>
-            </EmotionContextProvider>
-          </AppContextProvider>
-        </CollectionContextProvider>
-      </DbProvider>
-    </ErrorBoundary>
+    <DbProvider initialDb={state}>
+      <CollectionContextProvider>
+        <AppContextProvider>
+          <EmotionContextProvider>
+            <PinnedEtasContextProvider>
+              <ReactNativeContextProvider>
+                <Suspense fallback={null}>
+                  <App />
+                </Suspense>
+              </ReactNativeContextProvider>
+            </PinnedEtasContextProvider>
+          </EmotionContextProvider>
+        </AppContextProvider>
+      </CollectionContextProvider>
+    </DbProvider>
   );
 };
 
