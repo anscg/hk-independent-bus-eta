@@ -1,6 +1,7 @@
-import { useContext, useMemo } from "react";
+import { useContext, useMemo, useState, useEffect } from "react";
 import { Box, SxProps, Theme, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import AppContext from "../../context/AppContext";
 import { useEtas } from "../../hooks/useEtas";
 import { LinearProgress } from "../Progress";
@@ -116,6 +117,20 @@ const EtaLine = ({
   const language = useLanguage();
   const { etaFormat, platformMode } = useContext(AppContext);
 
+  // Add state for countdown
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    // Only update if eta is in the future
+    const etaTime = new Date(eta).getTime();
+    if (etaTime > now) {
+      const timer = setInterval(() => {
+        setNow(Date.now());
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [eta, now]);
+
   const branchRoute = useMemo(() => {
     if (co === "mtr") {
       return true;
@@ -131,9 +146,15 @@ const EtaLine = ({
     return true;
   }, [routeDests, dest, co]);
 
+  // Use 'now' for countdown
   const waitTime = Math.round(
-    (new Date(eta).getTime() - new Date().getTime()) / 60 / 1000
+    (new Date(eta).getTime() - now) / 60 / 1000
   );
+
+  // mm:ss countdown using 'now'
+  const msLeft = new Date(eta).getTime() - now;
+  const minLeft = Math.max(0, Math.floor(msLeft / 60000));
+  const secLeft = Math.max(0, Math.floor((msLeft % 60000) / 1000));
 
   const exactTimeJsx = (
     <Box
@@ -152,7 +173,31 @@ const EtaLine = ({
     waitTimeText = waitTime === 1 ? `${t("即將抵達")} ` : `${t("正在離開")} `;
     trainTextUsed = true;
   } else {
-    waitTimeText = waitTime < 1 ? " - " : `${waitTime} `;
+    // Changed: show mm:ss countdown with NumberFlow animation
+    waitTimeText = waitTime < 1 ? " - " : (
+      <NumberFlowGroup>
+        <Box
+          component="span"
+          sx={{ 
+            fontVariantNumeric: 'tabular-nums',
+            '--number-flow-char-height': '0.85em'
+          }}
+        >
+          <NumberFlow 
+            trend={-1} 
+            value={minLeft} 
+            format={{ minimumIntegerDigits: 2 }} 
+          />
+          <NumberFlow
+            prefix=":"
+            trend={-1}
+            value={secLeft}
+            digits={{ 1: { max: 5 } }}
+            format={{ minimumIntegerDigits: 2 }}
+          />
+        </Box>
+      </NumberFlowGroup>
+    );
     trainTextUsed = false;
   }
 
@@ -165,7 +210,7 @@ const EtaLine = ({
       >
         {waitTimeText}
       </Box>
-      {!trainTextUsed && (
+      {!trainTextUsed && waitTime >= 1 && (
         <Box component="span" sx={{ fontSize: "0.8em" }}>
           {t("分鐘")}
         </Box>
