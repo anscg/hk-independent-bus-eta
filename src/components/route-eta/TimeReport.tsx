@@ -11,8 +11,6 @@ import useLanguage from "../../hooks/useTranslation";
 import DbContext from "../../context/DbContext";
 import { DoubleTrainIcon, SingleTrainIcon } from "../home/SuccinctEtas";
 
-const canAnimate = useCanAnimate();
-
 interface TimeReportProps {
   routeId: string;
   seq: number;
@@ -118,6 +116,7 @@ const EtaLine = ({
   const { t } = useTranslation();
   const language = useLanguage();
   const { etaFormat, platformMode } = useContext(AppContext);
+  const canAnimate = useCanAnimate();
 
   // Add state for countdown
   const [now, setNow] = useState(() => Date.now());
