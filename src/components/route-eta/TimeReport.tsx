@@ -1,7 +1,7 @@
 import { useContext, useMemo, useState, useEffect } from "react";
 import { Box, SxProps, Theme, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import NumberFlow, { NumberFlowGroup, useCanAnimate } from '@number-flow/react';
+import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
 import AppContext from "../../context/AppContext";
 import { useEtas } from "../../hooks/useEtas";
 import { LinearProgress } from "../Progress";
@@ -116,7 +116,6 @@ const EtaLine = ({
   const { t } = useTranslation();
   const language = useLanguage();
   const { etaFormat, platformMode } = useContext(AppContext);
-  const canAnimate = useCanAnimate();
 
   // Add state for countdown
   const [now, setNow] = useState(() => Date.now());
@@ -168,53 +167,37 @@ const EtaLine = ({
 
   const isTrain = co === "mtr" || co === "lightRail";
 
-  let waitTimeText;
+  let waitTimeText: React.ReactNode;
   let trainTextUsed;
   if (isTrain && waitTime <= 1) {
     waitTimeText = waitTime === 1 ? `${t("即將抵達")} ` : `${t("正在離開")} `;
     trainTextUsed = true;
   } else {
-    // Changed: show mm:ss countdown with NumberFlow animation only if supported
-    if (waitTime < 1) {
-      waitTimeText = " - ";
-    } else if (canAnimate) {
-      waitTimeText = (
-        <NumberFlowGroup>
-          <Box
-            component="span"
-            sx={{ 
-              fontVariantNumeric: 'tabular-nums',
-              '--number-flow-char-height': '0.85em'
-            }}
-          >
-            <NumberFlow 
-              trend={-1} 
-              value={minLeft} 
-              format={{ minimumIntegerDigits: 2 }} 
-            />
-            <NumberFlow
-              prefix=":"
-              trend={-1}
-              value={secLeft}
-              digits={{ 1: { max: 5 } }}
-              format={{ minimumIntegerDigits: 2 }}
-            />
-          </Box>
-        </NumberFlowGroup>
-      );
-    } else {
-      // Fallback to plain text when animations aren't supported
-      waitTimeText = (
+    // Always show mm:ss countdown with NumberFlow animation
+    waitTimeText = (
+      <NumberFlowGroup>
         <Box
           component="span"
           sx={{ 
-            fontVariantNumeric: 'tabular-nums'
+            fontVariantNumeric: 'tabular-nums',
+            '--number-flow-char-height': '0.85em'
           }}
         >
-          {String(minLeft).padStart(2, '0')}:{String(secLeft).padStart(2, '0')}
+          <NumberFlow 
+            trend={-1} 
+            value={minLeft} 
+            format={{ minimumIntegerDigits: 2 }} 
+          />
+          <NumberFlow
+            prefix=":"
+            trend={-1}
+            value={secLeft}
+            digits={{ 1: { max: 5 } }}
+            format={{ minimumIntegerDigits: 2 }}
+          />
         </Box>
-      );
-    }
+      </NumberFlowGroup>
+    );
     trainTextUsed = false;
   }
 
