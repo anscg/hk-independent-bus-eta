@@ -1,7 +1,7 @@
 import { useContext, useMemo, useState, useEffect } from "react";
 import { Box, SxProps, Theme, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import NumberFlow, { NumberFlowGroup } from '@number-flow/react';
+import NumberFlow, { NumberFlowGroup, useCanAnimate } from '@number-flow/react';
 import AppContext from "../../context/AppContext";
 import { useEtas } from "../../hooks/useEtas";
 import { LinearProgress } from "../Progress";
@@ -10,6 +10,8 @@ import { getPlatformSymbol, getLineColor } from "../../utils";
 import useLanguage from "../../hooks/useTranslation";
 import DbContext from "../../context/DbContext";
 import { DoubleTrainIcon, SingleTrainIcon } from "../home/SuccinctEtas";
+
+const canAnimate = useCanAnimate();
 
 interface TimeReportProps {
   routeId: string;
@@ -174,7 +176,8 @@ const EtaLine = ({
     trainTextUsed = true;
   } else {
     // Always show mm:ss countdown with NumberFlow animation
-    waitTimeText = (
+    if (canAnimate) {
+      waitTimeText = (
       <NumberFlowGroup>
         <Box
           component="span"
@@ -198,6 +201,41 @@ const EtaLine = ({
         </Box>
       </NumberFlowGroup>
     );
+    } else waitTimeText = (
+
+        <Box
+
+          component="span"
+
+          sx={{ 
+
+
+            fontVariantNumeric: 'tabular-nums'
+
+
+          }}
+
+        >
+
+
+          {String(minLeft).padStart(2, '0')}:{String(secLeft).padStart(2, '0')}
+
+
+
+
+
+
+
+
+
+
+
+
+        </Box>
+
+
+      );
+    
     trainTextUsed = false;
   }
 
